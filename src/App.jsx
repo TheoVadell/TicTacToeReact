@@ -1,4 +1,3 @@
-// Importation de la fonction useState depuis React
 import { useState } from 'react';
 
 // Composant fonctionnel représentant un carré dans le jeu Tic Tac Toe
@@ -24,12 +23,14 @@ function Board({ xIsNext, squares, onPlay }) {
     // Crée une nouvelle copie du tableau de carrés
     const nextSquares = squares.slice();
 
+    // Détermine le prochain joueur et met à jour le tableau de carrés
     if (xIsNext) {
       nextSquares[i] = "X";
     } else {
       nextSquares[i] = "O";
     }
 
+    // Appelle la fonction de gestion du jeu avec le nouveau tableau de carrés
     onPlay(nextSquares);
   }
 
@@ -42,6 +43,7 @@ function Board({ xIsNext, squares, onPlay }) {
     status = "Prochain Tour: " + (xIsNext ? "X" : "O");
   }
 
+  // Rendu du composant Board avec les carrés et le statut
   return (
     <>
       <div className="status">{status}</div>
@@ -66,20 +68,30 @@ function Board({ xIsNext, squares, onPlay }) {
 
 // Composant fonctionnel principal représentant le jeu Tic Tac Toe
 export default function Game() {
-  const [xIsNext, setXIsNext] = useState(true); // État pour suivre le prochain joueur
-  const [history, setHistory] = useState([Array(9).fill(null)]); // État pour suivre l'historique des carrés
-  const currentSquares = history[history.length - 1]; // Tableau de carrés actuel
+  // État pour suivre l'historique des carrés
+  const [history, setHistory] = useState([Array(9).fill(null)]);
+  // État pour suivre le coup actuel
+  const [currentMove, setCurrentMove] = useState(0);
+  // Détermine si c'est au tour du joueur X ou O
+  const xIsNext = currentMove % 2 === 0;
+  // Récupère le tableau de carrés actuel à partir de l'historique
+  const currentSquares = history[currentMove];
 
   // Fonction appelée lorsqu'un joueur effectue un coup
   function handlePlay(nextSquares) {
-    setHistory([...history, nextSquares]); // Met à jour l'historique avec le nouveau tableau de carrés
-    setXIsNext(!xIsNext); // Change le tour du joueur
+    // Met à jour l'historique avec le nouveau tableau de carrés
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    // Met à jour le coup actuel
+    setCurrentMove(nextHistory.length - 1);
   }
   
+  // Fonction pour changer de coup dans l'historique
   function jumpTo(nextMove) {
-    // TODO
+    setCurrentMove(nextMove);
   }
 
+  // Génère une liste de boutons pour chaque coup dans l'historique
   const moves = history.map((squares, move) => {
     let description;
     if (move > 0) {
@@ -89,20 +101,19 @@ export default function Game() {
     }
     return (
       <li key={move}>
-      <button onClick={() => jumpTo(move)}>{description}</button>
-    </li>
+        <button onClick={() => jumpTo(move)}>{description}</button>
+      </li>
     )
   })
 
-  // Rendu du composant Game avec le tableau de jeu Board
+  // Rendu du composant Game avec le tableau de jeu Board et l'historique des coups
   return (
-    
     <div className="game">
       <div className="game-board">
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} />
       </div>
       <div className="game-info">
-        <ol>{moves}</ol> {/* Historique des coups à afficher ici */}
+        <ol>{moves}</ol>
       </div>
     </div>
   );
